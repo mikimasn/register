@@ -103,7 +103,7 @@ app.get('/login',async (req,res)=>{
     if(req.query.code)
     {
         try {
-			const oauthResult = fetch('https://discord.com/api/oauth2/token', {
+			const oauthResult = await fetch('https://discord.com/api/oauth2/token', {
 				method: 'POST',
 				body: new URLSearchParams({
 					client_id: config.clientid,
@@ -179,7 +179,6 @@ var sent=false;
                 });
         
                 const oauthData = await oauthResult.json();
-                console.log(oauthData.find(element=>element.id==='695225372265939015'));
                     if(oauthData.find(element=>element.id==='695225372265939015')!==undefined)
                     {
                         ok = true;
@@ -216,34 +215,59 @@ async function dbregister(token,id,name,callback)
     console.log({token:token,id:id,name:name})
     try
     {
-    var embed = new Discord.MessageEmbed()
-    .setTitle("Nowy zapisany")
-    .addFields([{name:"Mc name",value:name,inline:true},{name:"ID",value:id}])
-    .setTimestamp(new Date())
-    channel.send({embeds:[embed]}).then(async message=>{
         try {
+            const args = JSON.stringify({
+                access_token:token,
+                nick:name
+            });
 			const oauthResult = await fetch(`https://discord.com/api/guilds/${config.gid}/members/${id}`, {
-				method: 'POST',
+				method: 'PUT',
 				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded',
+					'Content-Type': 'application/json',
                     'Authorization':'Bot '+config.bot_token,
 				},
-                body:{
-                    'access_token':token,
-                    'nick':name
-                }
+                body:args,
+                
 			});
+            
+			const oauthData = await oauthResult;
+           if(oauthData.status==204)
+           {
+               callback(false)
+           }
+           else
+           {
+            try {
+                const oauthResult = await fetch('https://discord.com/api//users/@me', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization':'Bearer '+token
+                    },
+                });
+        
+                const oauthData = await oauthResult.json();
+                console.log(oauthData);
+                var embed = new Discord.MessageEmbed()
+                .setTitle("Nowy zapisany")
+                .addFields([{name:"Mc name",value:name,inline:true},{name:"ID",value:id,inline:true},{name:"e-mail",value:oauthData.email,inline:true}])
+                .setTimestamp(new Date())
+                channel.send({embeds:[embed]}).then(async message=>{callback(true)})
+                
+            } catch (error) {
+                // NOTE: An unauthorized token will not throw an error;
+                // it will return a 401 Unauthorized response in the try block above
+                console.error(error);
+            }
+           }
 
-			const oauthData = await oauthResult.json();
-            callback(true);
             
 		} catch (error) {
 			// NOTE: An unauthorized token will not throw an error;
 			// it will return a 401 Unauthorized response in the try block above
 			console.error(error);
-            callback(false)
+
 		}
-    });
 }
 catch(error)
 {
