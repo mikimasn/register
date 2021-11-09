@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
-import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 var config = {
     clientid:process.env.client,
@@ -14,7 +13,9 @@ var config = {
 console.log(config);
 import fs from 'fs';
 import mysql from 'mysql2';
-var app = express().use(bodyParser.json());
+var app = express();
+app.use(express.json());       // to support JSON-encoded bodies
+app.use(express.urlencoded()); // to support URL-encoded bodies
 import fetch from 'node-fetch';
 var channel
 import Discord from 'discord.js';
@@ -69,7 +70,7 @@ app.post('/',(req,res)=>{
             console.log(access.ok);
             if(access.ok&&!(access.sent))
             {
-                dbregister(access.id,req.body.name,(result)=>{
+                dbregister(req.cookies.token,access.id,req.body.name,(result)=>{
                     if(result)
                     {
                         res.send("ok");
@@ -210,7 +211,44 @@ var sent=false;
     }
     
 }
-function dbregister(id,name,callback)
+async function dbregister(token,id,name,callback)
 {
+    console.log({token:token,id:id,name:name})
+    try
+    {
+    var embed = new Discord.MessageEmbed()
+    .setTitle("Nowy zapisany")
+    .addFields([{name:"Mc name",value:name,inline:true},{name:"ID",value:id}])
+    .setTimestamp(new Date())
+    channel.send({embeds:[embed]}).then(async message=>{
+        try {
+			const oauthResult = await fetch(`https://discord.com/api/guilds/${config.gid}/members/${id}`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+                    'Authorization':'Bot '+config.bot_token,
+				},
+                body:{
+                    'access_token':token,
+                    'nick':name
+                }
+			});
+
+			const oauthData = await oauthResult.json();
+            callback(true);
+            
+		} catch (error) {
+			// NOTE: An unauthorized token will not throw an error;
+			// it will return a 401 Unauthorized response in the try block above
+			console.error(error);
+            callback(false)
+		}
+    });
+}
+catch(error)
+{
+    console.log(error)
+    callback(false)
+}
 
 }
