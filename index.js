@@ -3,12 +3,12 @@ dotenv.config();
 import express from 'express';
 import cookieParser from 'cookie-parser';
 var config = {
-    clientid:process.env.client,
-    secret:process.env.secret,
-    redirect:process.env.redirect,
-    bot_token:process.env.token,
-    gid:process.env.gid,
-    cid:process.env.cid
+    clientid:'907321397716598814',
+    secret:'om5sNMYxDaz4lI2WYrzhFBYCOTtEYGRR',
+    redirect:'https://registerpythontest.azurewebsites.net/login',
+    bot_token:'OTA3MzIxMzk3NzE2NTk4ODE0.YYle5g.fMjZCL-tWxirAJd_sI4dyEFShwQ',
+    gid:'907659036546203690',
+    cid:'907659194784690206'
 };
 console.log(config);
 import fs from 'fs';
