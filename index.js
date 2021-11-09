@@ -1,20 +1,32 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 var config = {
-    "clientid":process.env.client,
-    "secret":process.env.secret,
-    "redirect":process.env.redirect,
-    "bot_token":process.env.token,
-    "g_id":process.env.gid
+    clientid:process.env.client,
+    secret:process.env.secret,
+    redirect:process.env.redirect,
+    bot_token:process.env.token,
+    gid:process.env.gid,
+    cid:process.env.cid
 };
 console.log(config);
 import fs from 'fs';
 import mysql from 'mysql2';
 var app = express().use(bodyParser.json());
 import fetch from 'node-fetch';
-import dotenv from 'dotenv';
-dotenv.config();
+var channel
+import Discord from 'discord.js';
+var Intents = Discord.Intents.FLAGS;
+var client = new Discord.Client({ intents: [Intents.GUILDS,Intents.GUILD_MEMBERS,Intents.GUILD_MESSAGES,Intents.GUILD_MESSAGES]});
+client.on('ready',()=>{
+    channel = client.channels.cache.get(config.cid);
+    console.log("ready");
+})
+client.login(process.env.token);
+console.log(process.env.secret);
+
 app.use(cookieParser());
 app.get('/',(req,res)=>{
     if(req.cookies!==undefined)
