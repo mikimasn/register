@@ -3,12 +3,12 @@ dotenv.config();
 import express from 'express';
 import cookieParser from 'cookie-parser';
 var config = {
-    clientid:'907321397716598814',
-    secret:'om5sNMYxDaz4lI2WYrzhFBYCOTtEYGRR',
-    redirect:'https://registerpythontest.azurewebsites.net/login',
-    bot_token:'OTA3MzIxMzk3NzE2NTk4ODE0.YYle5g.fMjZCL-tWxirAJd_sI4dyEFShwQ',
-    gid:'907659036546203690',
-    cid:'907659194784690206'
+    clientid:process.env.client,
+    secret:process.env.secret,
+    redirect:process.env.redirect,
+    bot_token:process.env.token,
+    gid:process.env.gid,
+    cid:process.env.cid
 };
 console.log(config);
 import fs from 'fs';
@@ -17,15 +17,6 @@ var app = express();
 app.use(express.json());       // to support JSON-encoded bodies
 app.use(express.urlencoded()); // to support URL-encoded bodies
 import fetch from 'node-fetch';
-var channel
-import Discord from 'discord.js';
-var Intents = Discord.Intents.FLAGS;
-var client = new Discord.Client({ intents: [Intents.GUILDS,Intents.GUILD_MEMBERS,Intents.GUILD_MESSAGES,Intents.GUILD_MESSAGES]});
-client.on('ready',()=>{
-    channel = client.channels.cache.get(config.cid);
-    console.log("ready");
-})
-client.login(process.env.token);
 console.log(process.env.secret);
 
 app.use(cookieParser());
@@ -179,7 +170,7 @@ var sent=false;
                 });
         
                 const oauthData = await oauthResult.json();
-                    if(oauthData.find(element=>element.id==='695225372265939015')!==undefined)
+                    if(oauthData.find(element=>element.id==='810808143902408725')!==undefined)
                     {
                         ok = true;
                         callback({ok:ok,name:name,id:id,sent:sent});
@@ -238,7 +229,7 @@ async function dbregister(token,id,name,callback)
            else
            {
             try {
-                const oauthResult = await fetch('https://discord.com/api//users/@me', {
+                const oauthResult = await fetch('https://discord.com/api/users/@me', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
@@ -248,11 +239,21 @@ async function dbregister(token,id,name,callback)
         
                 const oauthData = await oauthResult.json();
                 console.log(oauthData);
-                var embed = new Discord.MessageEmbed()
-                .setTitle("Nowy zapisany")
-                .addFields([{name:"Mc name",value:name,inline:true},{name:"ID",value:id,inline:true},{name:"e-mail",value:oauthData.email,inline:true}])
-                .setTimestamp(new Date())
-                channel.send({embeds:[embed]}).then(async message=>{callback(true)})
+                const args = JSON.stringify({
+                    embeds:[{title:"Nowy zapisany",fields:[{name:"Mc name",value:name,inline:true},{name:"ID",value:id,inline:true},{name:"e-mail",value:oauthData.email,inline:true}],timestamp:new Date()}]
+                    })
+                const oauthResult2 = await fetch(`https://discord.com/api/channels/${config.cid}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization':'Bot '+config.bot_token
+                    },
+                    body:args
+                });
+        
+                const oauthData2 = await oauthResult2.json();
+                console.log(oauthData2);
+                callback(true);
                 
             } catch (error) {
                 // NOTE: An unauthorized token will not throw an error;
