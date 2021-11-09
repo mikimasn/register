@@ -200,10 +200,5 @@ var sent=false;
 }
 function dbregister(id,name,callback)
 {
-    var conn = mysql.createConnection({host:'178.32.219.12',user:"1198486_ltMb83",database:"1198486_ltMb83",password:"VI2akO5Mj3bSZr"});
-    conn.execute('SELECT * FROM `register` WHERE `id` = ?',[id],(err,results,fields)=>{
-        console.log(results); // results contains rows returned by server
-    console.log(fields);
-    console.log(err);
-    })
+
 }
