@@ -49,7 +49,7 @@ app.get('/',(req,res)=>{
     else
     {
         var response = fs.readFileSync('./not_login.html').toString();
-        res.send(response)
+        res.send(response);
     }
 });
 app.post('/',(req,res)=>{
